@@ -5,28 +5,55 @@
 
 from optparse import OptionParser
 from util import mean
+import copy
 import logging
 import random
 import sys
 
 
+#TODO - decide how we are tracking bids
+# Do the scoring
+
 def sim(config):
     n_agents = config.num_agents
+    base_domain = [0,40,100]
 
-    agent_values = {}
+    # Using the method from Hanson 2004
+    agent_domains = [[0,40,100] for _ in range(n_agents)]
+    true_value = random.choice([0,40,100])
 
-    # sample agent values
+    vals_to_remove = copy.deepcopy(base_domain)
+    vals_to_remove.remove(true_value)
+
+    set_1 = set(random.sample(range(n_agents), n_agents/2))
+    set_2 = set()
     for i in range(n_agents):
-        agent_values[i] = random.random()
+        if i not in set_1:
+            set_2.add(i)
+    shuffled_agents = random.shuffle(list(range(n_agents)))
 
-    true_value = mean(agent_values.values())
+    # remove one value from half of the agents' domains
+    for agent in set_1:
+        agent_domains[agent].remove(vals_to_remove[0])
 
-    print('agent-values {}, true_value {}'.format(agent_values, true_value))
+    for agent in set_2:
+        agent_domains[agent].remove(vals_to_remove[1])
+
+    print('agent-domains {}, true_value {}'.format(agent_domains, true_value))
 
     #TODO: 1) loop over rounds
     # 2) each round, each agent gets a noisy sample of the mean
-    # 3) each agent then buys one of each security with certain probability
+    # 3) each agent then buys the security that matches its beliefs with certain probability
     # tally up wins at the end
+
+    for t in range(config.num_rounds):
+        agent_order = random.shuffle(list(range(n_agents)))
+        for agent in agent_order:
+            signal = random.normalvariate(true_value, agent_sigmas[agent])
+            if signal > agent_values[agent]:
+                buy_positive(agent)
+            elif signal < agent_values[agent]:
+                buy_negative(agent)
 
 class Params:
     def __init__(self):
