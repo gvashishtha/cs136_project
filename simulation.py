@@ -5,71 +5,85 @@
 
 from optparse import OptionParser
 from util import mean
+from market import LMSRMarket
 import copy
 import logging
+import numpy as np
 import random
 import sys
 
+#random.seed(2)
 
-#TODO - decide how we are tracking bids
 # Do the scoring
-
-class Market():
-    def __init__(self, state=(0,0), beta=1.0):
-        self.state = state
-        self.beta = beta
-
-    def get_price(self, trade):
-        new_state = (self.state[0]+trade[0], self.state[1]+trade[1])
-        return self.get_cost(new_state) - self.get_cost(self.state)
-
-    def trade(self, trade):
-        self.state = (self.state[0]+trade[0], self.state[1]+trade[1])
-
-    def get_cost(self, state):
-        return beta * math.log(sum([math.exp(state[i]/self.beta) for i in range(len(state))]))
-
-
 def sim(config):
     n_agents = config.num_agents
-    base_domain = [0,40,100]
 
     # Using the method from Hanson 2004
-    agent_domains = [[0,40,100] for _ in range(n_agents)]
-    true_value = random.choice([0,40,100])
+    base_domain = [0.,0.4,1.0]
+    agent_holdings = [np.array([0.,0.]) for i in range(n_agents)]
+    agent_budgets = [config.budget for i in range(n_agents)]
+    agent_payoffs = [0 for i in range(n_agents)]
+    agent_domains = [copy.deepcopy(base_domain) for _ in range(n_agents)]
+
+    true_value = random.choice(base_domain)
 
     vals_to_remove = copy.deepcopy(base_domain)
     vals_to_remove.remove(true_value)
 
+    # For half the agents, reveal one incorrect belief.
+    # For the other half, remove a different incorrect belief.
     set_1 = set(random.sample(range(n_agents), n_agents/2))
     set_2 = set()
+
     for i in range(n_agents):
         if i not in set_1:
             set_2.add(i)
     shuffled_agents = random.shuffle(list(range(n_agents)))
 
-    # remove one value from half of the agents' domains
     for agent in set_1:
         agent_domains[agent].remove(vals_to_remove[0])
 
     for agent in set_2:
         agent_domains[agent].remove(vals_to_remove[1])
 
-    print('agent-domains {}, true_value {}'.format(agent_domains, true_value))
+    logging.info('agent domains {}, true_value {}'.format(agent_domains, true_value))
 
-    #TODO: 1) loop over rounds
-    # 2) each round, each agent gets a noisy sample of the mean
-    # 3) each agent then buys the security that matches its beliefs with certain probability
-    # tally up wins at the end
+    # To look into - maybe we should incorporate expected profit into decision about trading?
+
+    market = LMSRMarket()
 
     for t in range(config.num_rounds):
-        agent_order = random.shuffle(list(range(n_agents)))
+        agent_order = list(range(n_agents))
+        random.shuffle(agent_order)
         for agent in agent_order:
-            signal = random.normalvariate(true_value, agent_sigmas[agent])
-            if signal > agent_values[agent]:
-                buy_positive(agent)
-            elif signal < agent_values[agent]:
-                buy_negative(agent)
+            signal = mean(agent_domains[agent])
+            trade = market.calc_quantity(signal)
+            price = market.get_price(trade)
+
+            if trade[0] == 0.0: # we are trying to buy against the outcome
+                exp_profit = (1. - signal) - price
+            elif trade[1] == 0.0: # we are buying for the outcome
+                exp_profit = signal - price
+
+            logging.debug('signal {} market state {} exp_profit from trading {}'.format(signal, market.state, exp_profit))
+
+            if price < agent_budgets[agent]:
+                logging.debug('able to trade! executing {}'.format(trade))
+                market.trade(trade)
+                agent_holdings[agent] += trade
+                agent_budgets[agent] -= price
+            else:
+                logging.debug('not enough money to trade')
+
+
+    # decide payments
+    print('\n\n ---------------------------')
+    print('simulation over, true value was {}, agent holdings {} agents\' remaining budget {}\n\n'.format(true_value, agent_holdings, agent_budgets))
+    for agent in range(n_agents):
+        agent_payoffs[agent] += true_value*agent_holdings[agent][0] + (1.-true_value)*agent_holdings[agent][1]
+        print('agent {} belief {} received payoff {}'.format(agent, mean(agent_domains[agent]), agent_payoffs[agent]))
+
+    print('market collected revenue {}, paid {}, profit {}'.format(market.revenue, sum(agent_payoffs), market.revenue-sum(agent_payoffs)))
 
 class Params:
     def __init__(self):
@@ -108,12 +122,16 @@ def main(args):
                       help="Set the logging level: 'debug' or 'info'")
 
     parser.add_option("--num-rounds",
-                      dest="num_rounds", default=48, type="int",
+                      dest="num_rounds", default=10, type="int",
                       help="Set number of rounds")
 
     parser.add_option("--num-agents",
                       dest="num_agents", default=2, type="int",
                       help="Set number of agents")
+
+    parser.add_option("--budget",
+                      dest="budget", default=2., type="float",
+                      help="Set agent budgets")
 
     parser.add_option("--seed",
                       dest="seed", default=None, type="int",
