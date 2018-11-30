@@ -14,6 +14,22 @@ import sys
 #TODO - decide how we are tracking bids
 # Do the scoring
 
+class Market():
+    def __init__(self, state=(0,0), beta=1.0):
+        self.state = state
+        self.beta = beta
+
+    def get_price(self, trade):
+        new_state = (self.state[0]+trade[0], self.state[1]+trade[1])
+        return self.get_cost(new_state) - self.get_cost(self.state)
+
+    def trade(self, trade):
+        self.state = (self.state[0]+trade[0], self.state[1]+trade[1])
+
+    def get_cost(self, state):
+        return beta * math.log(sum([math.exp(state[i]/self.beta) for i in range(len(state))]))
+
+
 def sim(config):
     n_agents = config.num_agents
     base_domain = [0,40,100]
