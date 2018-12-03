@@ -19,10 +19,11 @@ def sim(config):
     n_agents = config.num_agents
 
     # Using the method from Hanson 2004
-    base_domain = [0.,0.4,1.0]
-    agent_holdings = [np.array([0.,0.]) for i in range(n_agents)]
+    base_domain = [0.,40.,100.]
+    base_holdings = np.array([0.,0.,0.])
+    agent_holdings = [base_holdings for i in range(n_agents)]
     agent_budgets = [config.budget for i in range(n_agents)]
-    agent_payoffs = [0 for i in range(n_agents)]
+    agent_payoffs = [0. for i in range(n_agents)]
     agent_domains = [copy.deepcopy(base_domain) for _ in range(n_agents)]
 
     true_value = random.choice(base_domain)
@@ -50,7 +51,7 @@ def sim(config):
 
     # To look into - maybe we should incorporate expected profit into decision about trading?
 
-    market = LMSRMarket()
+    market = LMSRMarket(state=base_holdings)
 
     for t in range(config.num_rounds):
         agent_order = list(range(n_agents))

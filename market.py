@@ -8,23 +8,23 @@ class LMSRMarket():
         self.revenue = 0.0
 
     def get_price(self, trade):
-        #new_state = np.array([self.state[0]+trade[0], self.state[1]+trade[1]])
+        # Tells us how much to charge the agent for a given trade
         return self.get_cost(self.state + trade) - self.get_cost(self.state)
 
     def trade(self, trade):
+        # updates the market state based on a given trade
         self.revenue += self.get_price(trade)
         self.state += trade
-        #[self.state[0]+trade[0], self.state[1]+trade[1]]
 
     def get_cost(self, state):
+        # Uses LMSR scoring to calculate cost under a given state (eqn 18.5)
         powers = map(lambda x: math.exp(x/self.beta), state)
-        # for i in range(len(state))]
         return self.beta * math.log(sum(powers))
 
-    # Use formula 18.6 in textbook
     def instant_price(self, index):
+        # Use formula 18.6 in textbook
+        # Calculates the instantaneous price for contract at index
         powers = map(lambda x: math.exp(x/self.beta), self.state)
-        #powers = [math.exp(self.state[i]/self.beta) for i in range(len(self.state))]
         return math.exp(self.state[index]/self.beta)/sum(powers)
 
     def pos_price(self):
@@ -36,6 +36,8 @@ class LMSRMarket():
         #return self.get_price([0,1])
 
     def calc_quantity(self, true_belief):
+        # given an agent's true belief, calculate a vector of trades
+        # that would make the market belief match their true belief
         if self.pos_price() < true_belief:
             index = 0
         elif self.neg_price() < (1.-true_belief):
