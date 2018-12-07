@@ -1,3 +1,4 @@
+import logging
 import math
 import numpy as np
 
@@ -9,7 +10,11 @@ class LMSRMarket():
 
     def get_price(self, trade):
         # Tells us how much to charge the agent for a given trade
-        return self.get_cost(self.state + trade) - self.get_cost(self.state)
+        try:
+            return self.get_cost(self.state + trade) - self.get_cost(self.state)
+        except ValueError:
+            print 'ValueError trade is {} state is{}'.format(trade, self.state)
+            raise ValueError
 
     def trade(self, trade):
         # updates the market state based on a given trade
@@ -19,7 +24,9 @@ class LMSRMarket():
     def get_cost(self, state):
         # Uses LMSR scoring to calculate cost under a given state (eqn 18.5)
         powers = map(lambda x: math.exp(x/self.beta), state)
-        return self.beta * math.log(sum(powers))
+        cost = self.beta * math.log(sum(powers))
+        logging.debug('cost is {} powers is {} for state {}'.format(cost, powers, state))
+        return cost
 
     def instant_price(self, index):
         # Use formula 18.6 in textbook

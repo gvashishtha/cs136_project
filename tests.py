@@ -16,6 +16,10 @@ for i in range(100):
         error = True
         break
 
+print 'testing cost calculation...'
+
+
+
 if not error:
     print('All tests passed!')
 
