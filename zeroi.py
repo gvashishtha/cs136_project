@@ -1,8 +1,8 @@
-from buyone import BuyOne
+from base_agent import BaseAgent
 import numpy as np
 import random
 
-class ZeroI(BuyOne):
+class ZeroI(BaseAgent):
     def __init__(self, id, budget, alpha=1, beta=1):
         self.id = id
         self.budget = budget

@@ -1,7 +1,8 @@
+from base_agent import BaseAgent
 import logging
 import numpy as np
 
-class BuyOne():
+class BuyOne(BaseAgent):
     def __init__(self, id, budget, alpha=1, beta=1):
         self.id = id
         self.budget = budget
