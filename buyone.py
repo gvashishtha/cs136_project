@@ -2,16 +2,17 @@ import logging
 import numpy as np
 
 class BuyOne():
-    def __init__(self, id, budget):
+    def __init__(self, id, budget, alpha=1, beta=1):
         self.id = id
         self.budget = budget
-        self.alpha = 1
+        self.alpha = 1 # ignore true alpha and beta values
         self.beta = 1
 
     def __repr__(self):
-        return 'BuyOne agent with id {} budget {} alpha {} beta {}'.format(self.id, self.budget, self.alpha, self.beta)
+        return 'BuyOne id {} budget {} belief {}'.format(self.id, self.budget, self.cur_belief())
 
     def update_prior(self, signal):
+        logging.debug('agent {} received signal {}'.format(self, signal))
         if signal == 1:
             self.alpha += 1
         else:

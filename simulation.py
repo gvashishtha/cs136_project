@@ -21,11 +21,9 @@ def sim(config):
     logging.debug(agents)
     n_agents = len(agents)
 
-    total_draws = n_agents * config.num_rounds
-    # parameters for true underlying probability
-    alpha = float(random.randint(1, total_draws))
-    beta = float(total_draws - alpha)
-    true_prob = alpha/(alpha+beta)
+    alpha = config.alpha
+    beta = config.beta
+    true_prob = config.true_prob
 
     base_holdings = np.array([0.,0.])
 
@@ -36,10 +34,9 @@ def sim(config):
     market = LMSRMarket(state=base_holdings)
     logging.debug(market)
     for t in range(config.num_rounds):
-        agent_order = list(range(n_agents))
-        random.shuffle(agent_order)
+        #agent_order = list(range(n_agents))
+        random.shuffle(agents)
         for agent in agents:
-
             # draw a 1 with probability drawn from beta distribution
             drawn_value = random.betavariate(alpha, beta)
             if random.random() < drawn_value:
@@ -78,7 +75,8 @@ def sim(config):
             agent_payoffs[agent.id] = agent_holdings[agent.id][0]
         else:
             agent_payoffs[agent.id] = agent_holdings[agent.id][1]
-        print 'agent {} belief {} received payoff {}'.format(agent.id, agent.cur_belief(), agent_payoffs[agent.id])
+        amt_spent = config.budget-agent_budgets[agent.id]
+        print 'agent {} received utility {}'.format(agent, agent_payoffs[agent.id]-amt_spent)
 
     print('market collected revenue {}, paid {}, profit {}'.format(market.revenue, sum(agent_payoffs), market.revenue-sum(agent_payoffs)))
 
@@ -107,9 +105,10 @@ def configure_logging(loglevel):
 
 def init_agents(conf):
     """Each agent class must be already loaded, and have a
-    constructor that takes an id, a value, and a budget, in that order."""
+    constructor that takes an id, a budget, an alpha, and a beta, in that
+    order."""
     n = len(conf.agent_class_names)
-    params = zip(range(n), itertools.repeat(conf.budget))
+    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.alpha), itertools.repeat(conf.beta))
     def load(class_name, params):
         agent_class = conf.agent_classes[class_name]
         return agent_class(*params)
@@ -186,6 +185,13 @@ def main(args):
         agents_to_run = ['BuyOne', 'BuyOne', 'BuyOne']
     else:
         agents_to_run = parse_agents(args)
+
+    n_agents = len(agents_to_run)
+    total_draws = n_agents * options.num_rounds
+    # parameters for true underlying probability
+    options.alpha = float(random.randint(1, total_draws))
+    options.beta = float(total_draws - options.alpha)
+    options.true_prob = options.alpha/(options.alpha+options.beta)
 
     # Add some more config options
     options.agent_class_names = agents_to_run
