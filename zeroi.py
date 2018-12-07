@@ -3,10 +3,10 @@ import numpy as np
 import random
 
 class ZeroI(BaseAgent):
-    def __init__(self, id, budget, alpha=1, beta=1):
+    def __init__(self, id, budget, true_alpha, true_beta, alpha, beta):
         self.id = id
         self.budget = budget
-        self.belief = random.betavariate(alpha, beta)
+        self.belief = random.betavariate(true_alpha, true_beta)
 
     def __repr__(self):
         return 'ZeroI id {} belief {} budget {}'.format(self.id, self.belief, self.budget)

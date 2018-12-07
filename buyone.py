@@ -3,12 +3,6 @@ import logging
 import numpy as np
 
 class BuyOne(BaseAgent):
-    def __init__(self, id, budget, alpha=1, beta=1):
-        self.id = id
-        self.budget = budget
-        self.alpha = 1 # ignore true alpha and beta values
-        self.beta = 1
-
     def __repr__(self):
         return 'BuyOne id {} budget {} belief {}'.format(self.id, self.budget, self.cur_belief())
 
