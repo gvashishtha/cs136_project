@@ -30,11 +30,11 @@ def sim(config):
     base_holdings = np.array([0.,0.])
 
     agent_budgets = [float(a.budget) for a in agents]
-    agent_holdings = [base_holdings for i in range(n_agents)]
+    agent_holdings = [copy.deepcopy(base_holdings) for i in range(n_agents)]
     agent_payoffs = [0. for i in range(n_agents)]
 
     market = LMSRMarket(state=base_holdings)
-
+    logging.info(market)
     for t in range(config.num_rounds):
         agent_order = list(range(n_agents))
         random.shuffle(agent_order)
@@ -63,6 +63,7 @@ def sim(config):
             else:
                 logging.debug('not enough money to trade')
 
+    print(market)
     # Decide on the outcome of the simulation
     if random.random() < true_prob:
         outcome = True

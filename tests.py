@@ -18,7 +18,7 @@ for i in range(100):
         error = True
         break
 
-print 'testing cost function...'
+print 'testing price function...'
 test = LMSRMarket(beta=1.0)
 test.state = np.array([0.,0.])
 
@@ -36,28 +36,51 @@ prices = [0.62, 1.74, 0.08]
 
 for t,p in zip(trades, prices):
     price_tester(t, p)
+
+print 'testing instant price function ...'
 assert(round(test.instant_price(0), 2) == 0.88)
 assert(round(test.instant_price(1), 2) == 0.12)
 
+print 'testing revenue function ...'
+try:
+    assert(abs(round(test.revenue, 2) - sum(prices)) <= 0.05)
+    #print('cost final - cost initial is {} '.format(test.get_cost(test.state)-test.get_cost(np.array([0.,0.]))))
+except AssertionError:
+    print('failing revenue test, revenue {} prices sum {}'.format(test.revenue, sum(prices)))
+    error = True
+
 print 'testing bounded loss...'
 for i in range(10):
-    test = LMSRMarket()
+    test3 = LMSRMarket()
     amts = np.array([0., 0.])
     for j in range(100):
+        #print(test3)
         q0_amt = random.random()
         q1_amt = random.random()
-        test.trade(np.array([q0_amt, q1_amt]))
+        old_revenue = test3.revenue
+        test3.trade(np.array([q0_amt, q1_amt]))
+        expected_revenue = test3.get_cost(test3.state)-test3.get_cost(np.array([0.,0.]))
+        try:
+            assert(abs(test3.revenue - expected_revenue) < 0.05)
+        except AssertionError:
+            trade = np.array([q0_amt, q1_amt])
+            old_state = test3.state - trade
+            print('revenue calc failing with mkt state {}, prev_state is {}, get_price {} old revenue {} new rev {} expected rev {}'.format(test3.state, old_state, test3.get_price(trade), old_revenue, test3.revenue, expected_revenue))
+            error=True
+            break
         amts[0] += q0_amt
         amts[1] += q1_amt
     outcome = random.choice([True, False])
     if outcome:
-        loss = test.revenue-amts[0]
+        loss = amts[0]-test3.revenue
     else:
-        loss = test.revenue-amts[1]
+        loss = amts[1]-test3.revenue
     try:
-        assert(loss <= test.beta*math.log(2))
+        assert(loss <= test3.beta*math.log(2)) # equation 18.9 in book
     except AssertionError:
-        print 'failing bounded loss with mkt state {}, losing {}'.format(test.state, loss)
+        final_cost = test3.get_cost(test3.state)
+        initial_cost = test3.get_cost(np.array([0.,0.]))
+        print 'failing bounded loss with mkt state {}, revenue {}, losing {} revenue should be {}'.format(test3.state, test3.revenue, loss, final_cost-initial_cost)
         error=True
         break
 
