@@ -34,7 +34,7 @@ def sim(config):
     agent_payoffs = [0. for i in range(n_agents)]
 
     market = LMSRMarket(state=base_holdings)
-    logging.info(market)
+    logging.debug(market)
     for t in range(config.num_rounds):
         agent_order = list(range(n_agents))
         random.shuffle(agent_order)
@@ -63,7 +63,7 @@ def sim(config):
             else:
                 logging.debug('not enough money to trade')
 
-    print(market)
+    logging.debug(market)
     # Decide on the outcome of the simulation
     if random.random() < true_prob:
         outcome = True
@@ -72,7 +72,7 @@ def sim(config):
 
     # decide payments
     print('\n\n ---------------------------')
-    print('simulation over, true probability was {}, outcome was {}, agent holdings {} agents\' remaining budget {}\n\n'.format(true_prob, outcome, agent_holdings, agent_budgets))
+    print('simulation over, true probability was {}, market probability {}, outcome was {}, agent holdings {} agents\' remaining budget {}\n\n'.format(true_prob, market.instant_price(0), outcome, agent_holdings, agent_budgets))
     for agent in agents:
         if outcome:
             agent_payoffs[agent.id] = agent_holdings[agent.id][0]

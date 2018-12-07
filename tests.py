@@ -51,7 +51,7 @@ except AssertionError:
 
 print 'testing bounded loss...'
 for i in range(10):
-    test3 = LMSRMarket()
+    test3 = LMSRMarket(beta = random.choice(range(1,30)))
     amts = np.array([0., 0.])
     for j in range(100):
         #print(test3)
