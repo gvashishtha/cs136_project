@@ -13,12 +13,15 @@ class BaseAgent(object):
     def update_prior(self, signal):
         # Given a 0, 1 signal from the underlying Beta distribution,
         # update the agent's prior beliefs about the likelihood of the event
-        raise NotImplementedError
+        if signal == 1:
+            self.alpha += 1
+        elif signal == 0:
+            self.beta += 1
 
     def cur_belief(self):
         # Should return a float in [0, 1] that represents the belief of
         # the agent about the likelihood of the event's ocurring
-        raise NotImplementedError
+        return float(self.alpha)/(float(self.alpha)+float(self.beta))
 
     def calc_quantity(self, market):
         # Should return a numpy array [x, y] where x represents the quantity

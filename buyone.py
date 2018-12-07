@@ -12,16 +12,6 @@ class BuyOne(BaseAgent):
     def __repr__(self):
         return 'BuyOne id {} budget {} belief {}'.format(self.id, self.budget, self.cur_belief())
 
-    def update_prior(self, signal):
-        logging.debug('agent {} received signal {}'.format(self, signal))
-        if signal == 1:
-            self.alpha += 1
-        else:
-            self.beta += 1
-
-    def cur_belief(self):
-        return float(self.alpha)/(float(self.alpha)+float(self.beta))
-
     def calc_quantity(self, market):
         # If market probability is less than current belief, try to buy 1 share for the outcome
         # else if market probability is greater, try to buy 1 share against outcome
