@@ -8,8 +8,10 @@ class ZeroI(BaseAgent):
         self.budget = budget
         self.belief = random.betavariate(true_alpha, true_beta)
 
-    def __repr__(self):
-        return 'ZeroI id {} belief {} budget {}'.format(self.id, self.belief, self.budget)
+    def name(self):
+        return 'ZeroI'
+    # def __repr__(self):
+    #     return 'ZeroI id {} belief {} budget {}'.format(self.id, self.belief, self.budget)
 
     def update_prior(self, signal):
         pass

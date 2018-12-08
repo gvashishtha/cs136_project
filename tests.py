@@ -94,7 +94,7 @@ sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1"]
 main(sys.argv)
 
 print 'testing that posteriors update correctly'
-sys.argv = ['simulation.py', 'BuyOne,3', '--num-rounds=100']
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100']
 (agents, true_prob) = main(sys.argv)
 for agent in agents:
     try:

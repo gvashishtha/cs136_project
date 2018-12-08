@@ -1,13 +1,14 @@
+import copy
 import logging
 import math
 import numpy as np
 
 class LMSRMarket():
-    def __init__(self, state=None, beta=1.0):
+    def __init__(self, state=None, alpha=1.0, beta=1.0):
         if state is None:
             self.state = np.array([0.,0.])
         else:
-            self.state = state
+            self.state = copy.deepcopy(state)
         self.beta = beta
         self.revenue = 0.0
 

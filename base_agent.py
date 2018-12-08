@@ -12,7 +12,7 @@ class BaseAgent(object):
 
     def __repr__(self):
         # Return a string representing this agent
-        raise NotImplementedError
+        return 'Agent {} id {}'.format(self.name(), self.id)
 
     def update_prior(self, signal):
         # Given a 0, 1 signal from the underlying Beta distribution,
