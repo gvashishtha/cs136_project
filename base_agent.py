@@ -1,10 +1,11 @@
 class BaseAgent(object):
     # BaseAgent - other agent classes should subclass this agent
-    def __init__(self, id, budget, alpha=1, beta=1):
+    def __init__(self,
+        id, budget, true_alpha=1, true_beta=1, alpha=1, beta=1):
         self.id = id
         self.budget = budget
-        self.alpha = 1 # ignore true alpha and beta values
-        self.beta = 1
+        self.alpha = alpha # ignore true alpha and beta values
+        self.beta = beta
 
     def __repr__(self):
         # Return a string representing this agent

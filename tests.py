@@ -70,11 +70,14 @@ for i in range(10):
             break
         amts[0] += q0_amt
         amts[1] += q1_amt
+    # Decide on outcome and calculate the loss to the market maker
     outcome = random.choice([True, False])
     if outcome:
         loss = amts[0]-test3.revenue
     else:
         loss = amts[1]-test3.revenue
+
+    # Ensure the loss is bounded by the expected bound
     try:
         assert(loss <= test3.beta*math.log(2)) # equation 18.9 in book
     except AssertionError:
