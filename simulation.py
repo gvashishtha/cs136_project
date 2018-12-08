@@ -5,7 +5,7 @@
 
 from optparse import OptionParser
 from util import mean
-from market import LMSRMarket
+from market import LMSRMarket, LMSRProfitMarket
 import copy
 import itertools
 import logging
@@ -31,7 +31,7 @@ def sim(config):
     agent_holdings = [copy.deepcopy(base_holdings) for i in range(n_agents)]
     agent_payoffs = [0. for i in range(n_agents)]
 
-    market = LMSRMarket(state=base_holdings)
+    market = LMSRProfitMarket(state=base_holdings)
     logging.debug(market)
     for t in range(config.num_rounds):
         #agent_order = list(range(n_agents))
