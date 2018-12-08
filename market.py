@@ -59,7 +59,10 @@ class LMSRMarket():
             return np.array([0.0, 0.0])
 
         constant = math.exp(self.state[1-index]/self.beta)
-        quant = self.beta*math.log(true_belief * constant/(1.-true_belief))-float(self.state[index])
+        try:
+            quant = self.beta*math.log(true_belief * constant/(1.-true_belief))-float(self.state[index])
+        except ZeroDivisionError:
+            quant = 0.
 
         out = np.array([0.0, 0.0])
         out[index] = quant

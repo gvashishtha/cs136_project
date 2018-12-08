@@ -78,6 +78,7 @@ def sim(config):
         print 'agent {} received utility {}'.format(agent, agent_payoffs[agent.id]-amt_spent)
 
     print('market collected revenue {}, paid {}, profit {}'.format(market.revenue, sum(agent_payoffs), market.revenue-sum(agent_payoffs)))
+    return (agents, true_prob)
 
 class Params:
     def __init__(self):
@@ -104,10 +105,10 @@ def configure_logging(loglevel):
 
 def init_agents(conf):
     """Each agent class must be already loaded, and have a
-    constructor that takes an id, a budget, a true alpha, a true beta, an alpha, and a beta in that
-    order."""
+    constructor that takes an id, a budget, a true alpha, a true beta, a
+    noise value, an alpha, and a beta in that order."""
     n = len(conf.agent_class_names)
-    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.true_alpha), itertools.repeat(conf.true_beta))
+    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.true_alpha), itertools.repeat(conf.true_beta), itertools.repeat(conf.noise))
     def load(class_name, params):
         agent_class = conf.agent_classes[class_name]
         agent_mu = random.betavariate(conf.true_alpha, conf.true_beta)
@@ -150,7 +151,6 @@ def parse_agents(args):
     return ans
 
 def main(args):
-
     usage_msg = "Usage:  %prog [options] PeerClass1[,cnt] PeerClass2[,cnt2] ..."
     parser = OptionParser(usage=usage_msg)
 
@@ -179,7 +179,9 @@ def main(args):
                       dest="sigma", default=None, type="int",
                       help="alpha + beta for agent priors")
 
-
+    parser.add_option("--noise",
+                      dest="noise", default=0.0, type="float",
+                      help="at noise = 0, agents always correctly interpret their signal")
 
     (options, args) = parser.parse_args()
 
@@ -211,7 +213,7 @@ def main(args):
     options.agent_classes = load_modules(options.agent_class_names)
 
     logging.info("Starting simulation...")
-    sim(options)
+    return sim(options)
 
 
 if __name__ == "__main__":

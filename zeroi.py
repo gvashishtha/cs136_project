@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 class ZeroI(BaseAgent):
-    def __init__(self, id, budget, true_alpha, true_beta, alpha, beta):
+    def __init__(self, id, budget, true_alpha, true_beta, noise, alpha, beta):
         self.id = id
         self.budget = budget
         self.belief = random.betavariate(true_alpha, true_beta)
