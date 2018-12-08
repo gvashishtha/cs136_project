@@ -64,9 +64,15 @@ class LMSRMarket(object):
         else:
             return np.array([0.0, 0.0])
 
-        constant = math.exp(self.state[1-index]/self.beta)
+        # try:
+        #     constant = math.exp(self.state[1-index]/self.beta)
+        # except OverflowError:
+        #     logging.error('state is {} beta is {} index is {}'.format(self.state, index, self.beta))
+        #     raise OverflowError
         try:
-            quant = self.beta*math.log(true_belief * constant/(1.-true_belief))-float(self.state[index])
+            quant = self.beta*(math.log(true_belief) + \
+            self.state[1-index]/self.beta) - \
+            math.log(1.-true_belief)-float(self.state[index])
         except ZeroDivisionError:
             quant = 0.
 
