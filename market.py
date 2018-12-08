@@ -3,9 +3,10 @@ import logging
 import math
 import numpy as np
 
-class LMSRMarket():
+class LMSRMarket(object):
     def __init__(self, state=None, alpha=1.0, beta=1.0):
         if state is None:
+            # state is a numpy array
             self.state = np.array([0.,0.])
         else:
             self.state = copy.deepcopy(state)
@@ -18,6 +19,7 @@ class LMSRMarket():
     def get_price(self, trade):
         # Tells us how much to charge the agent for a given trade
         try:
+            # print("Self.get_cost(state) is: ", self.get_cost(self.state))
             return self.get_cost(self.state + trade) - self.get_cost(self.state)
         except ValueError:
             print 'ValueError trade is {} state is{}'.format(trade, self.state)
@@ -68,3 +70,54 @@ class LMSRMarket():
         out = np.array([0.0, 0.0])
         out[index] = quant
         return out
+
+
+class LMSRProfitMarket(LMSRMarket):
+    """
+    Modified LMSR to turn profit by relaxing normalization
+    """
+    def __init__(self, state=None, beta = 1.0, alpha = 1.0):
+        LMSRMarket.__init__(self, state, beta)
+        self.alpha = alpha
+    
+
+    def update_beta(self, state):
+        """
+        Given quantity vector (market state) q, we have: 
+            beta(q) = alpha*sum_i(q_i) 
+        """
+        self.beta = self.alpha*sum(state)
+        
+        # assuming beta is only zero when we have no participants
+        if self.beta == 0:
+           self.beta = 0.5
+
+
+    def instant_price(self, index):
+        """ 
+        Use formula for price at state i from 4.1 in Othman paper
+        Calculates the instantaneous price for contract at index
+        """
+        # update beta 
+        self.update_beta(self.state)
+        powers = map(lambda x: math.exp(x/self.beta), self.state)
+
+        # price at index i = A + ((B - C)/D) 
+        A = self.alpha*math.log(sum(powers))
+        B = sum(self.state*math.exp(self.state[index]/self.beta))
+        C = sum(map(lambda x: x*math.exp(x/self.beta), self.state))
+        D = sum(self.state)*sum(powers)
+        
+        # if we are dividing by zero, no contracts bought
+        # so we use original LMSR
+        if D == 0:
+            return LMSRMarket().instant_price(index)
+
+        return (A + (B - C)/D)
+
+
+    def get_cost(self, state):
+        # update beta
+        self.update_beta(state)
+        # Uses LMSR to calculate cost under a given state (eqn 18.5)
+        return LMSRMarket(self).get_cost(state)
