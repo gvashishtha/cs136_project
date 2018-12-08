@@ -46,12 +46,12 @@ class LMSRMarket(object):
         return math.exp(self.state[index]/self.beta)/sum(powers)
 
     def upper_bound(self):
-        probs = [self.instant_price(0), 1-self.instant_price(1)]
+        probs = [self.instant_price(0), 1.-self.instant_price(1)]
         probs.sort()
         return probs[1]
 
     def lower_bound(self):
-        probs = [self.instant_price(0), 1-self.instant_price(1)]
+        probs = [self.instant_price(0), 1.-self.instant_price(1)]
         probs.sort()
         return probs[0]
 
