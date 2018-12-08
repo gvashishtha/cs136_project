@@ -41,7 +41,7 @@ def sim(config):
 
         if config.mkt_type == 'LMSR':
             market = LMSRMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
-        if config.mkt_type == 'LMSRMoney':
+        else:
             market = LMSRProfitMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
         logging.debug('market is {}, base_holdings are {}'.format(market, base_holdings))
         for t in range(config.num_rounds):
@@ -193,7 +193,7 @@ def main(args):
                       dest="loglevel", default="info",
                       help="Set the logging level: 'debug' or 'info'")
 
-    parser.add_option("--num-rounds",
+    parser.add_option("--num_rounds",
                       dest="num_rounds", default=10, type="int",
                       help="Set number of rounds")
 
@@ -223,7 +223,7 @@ def main(args):
 
     parser.add_option("--mkt_type",
                       dest="mkt_type", default='LMSR', type="string",
-                      help="Choose either LMSR or LMSRMoney")
+                      help="Choose either LMSR or LMSRProfit")
 
     parser.add_option("--num_trials",
                       dest="num_trials", default=10, type="int",

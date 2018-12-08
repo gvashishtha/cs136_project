@@ -117,9 +117,9 @@ def belief_tester():
             error=True
             break
 
-sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSR', '-q']
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num_rounds=100', '--mkt_type=LMSR', '-q']
 belief_tester()
-sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSRMoney', '-q']
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num_rounds=100', '--mkt_type=LMSRMoney', '-q']
 belief_tester()
 
 print ('testing LMSR Profit beta calculations...')
