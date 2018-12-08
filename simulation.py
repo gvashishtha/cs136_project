@@ -29,6 +29,9 @@ def sim(config):
     mkt_revenues = []
     mkt_payoffs = []
 
+    mkt_lower_bounds = [[] for _ in range(config.num_trials)]
+    mkt_upper_bounds = [[] for _ in range(config.num_trials)]
+
     agent_beliefs = [[0. for _ in range(config.num_trials)] for i in range(n_agents)]
     agent_payoffs = copy.deepcopy(agent_beliefs)
     agent_utils = copy.deepcopy(agent_beliefs)
@@ -70,6 +73,8 @@ def sim(config):
                     agent_budgets[agent.id] -= float(price)
                 else:
                     logging.debug('not enough money to trade')
+                mkt_lower_bounds[k].append(market.lower_bound())
+                mkt_upper_bounds[k].append(market.upper_bound())
 
         logging.debug(market)
 
@@ -92,7 +97,7 @@ def sim(config):
             mkt_payoff += payoff
             agent_beliefs[agent.id][k] = agent.cur_belief()
 
-        mkt_probs.append(market.instant_price(0))
+        mkt_probs.append(mean([mean(mkt_lower_bounds[k]), mean(mkt_upper_bounds[k])]))
         mkt_revenues.append(market.revenue)
         mkt_payoffs.append(mkt_payoff)
 
@@ -101,7 +106,8 @@ def sim(config):
     # decide payments
     if config.output:
         print '\n\n ---------------------------'
-        print 'simulation over, true probability was {}, avg market probability {}\n\n'.format(true_prob, mean(mkt_probs))
+        print 'simulation over, true probability was {}, avg market probability {} \n\n'.format(true_prob, mean(mkt_probs))
+        logging.debug('market lower bounds {} \n\n market upper bounds {}\n\n'.format(mkt_lower_bounds, mkt_upper_bounds))
 
         for agent in agents:
             print 'agent {} avg payoff {} avg utility {} avg ending belief {}'.format(agent, mean(agent_payoffs[agent.id]), mean(agent_utils[agent.id]), mean(agent_beliefs[agent.id]))
