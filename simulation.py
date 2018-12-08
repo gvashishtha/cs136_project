@@ -29,6 +29,10 @@ def sim(config):
     mkt_revenues = []
     mkt_payoffs = []
 
+    # Store the lower and upper bounds on "market probabilities" at each
+    # time step, where market probability is the aggregate market belief that
+    # an event will occur
+    
     mkt_lower_bounds = [[] for _ in range(config.num_trials)]
     mkt_upper_bounds = [[] for _ in range(config.num_trials)]
 
@@ -201,7 +205,7 @@ def main(args):
 
     parser.add_option("--num_rounds",
                       dest="num_rounds", default=10, type="int",
-                      help="Set number of rounds")
+                      help="Decide how many times agents get to bid")
 
     parser.add_option("--budget",
                       dest="budget", default=2., type="float",
