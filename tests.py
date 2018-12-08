@@ -112,6 +112,7 @@ def belief_tester():
     for agent in agents:
         try:
             assert(abs(agent.cur_belief()-true_prob) <= 0.05)
+            logging.debug('agent {} true prob {} belief {}'.format(agent, true_prob, agent.cur_belief()))
         except AssertionError:
             logging.error('agent belief issue with {}. Exiting'.format(agent))
             error=True

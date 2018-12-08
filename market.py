@@ -45,6 +45,16 @@ class LMSRMarket(object):
         powers = map(lambda x: math.exp(x/self.beta), self.state)
         return math.exp(self.state[index]/self.beta)/sum(powers)
 
+    def upper_bound(self):
+        probs = [self.instant_price(0), 1-self.instant_price(1)]
+        probs.sort()
+        return probs[1]
+
+    def lower_bound(self):
+        probs = [self.instant_price(0), 1-self.instant_price(1)]
+        probs.sort()
+        return probs[0]
+
     def pos_price(self):
         #return self.get_price([1,0])
         return self.instant_price(0)
