@@ -3,13 +3,15 @@ import numpy as np
 import random
 
 class ZeroI(BaseAgent):
-    def __init__(self, id, budget, true_alpha, true_beta, alpha, beta):
+    def __init__(self, id, budget, true_alpha, true_beta, noise, alpha, beta):
         self.id = id
         self.budget = budget
         self.belief = random.betavariate(true_alpha, true_beta)
 
-    def __repr__(self):
-        return 'ZeroI id {} belief {} budget {}'.format(self.id, self.belief, self.budget)
+    def name(self):
+        return 'ZeroI'
+    # def __repr__(self):
+    #     return 'ZeroI id {} belief {} budget {}'.format(self.id, self.belief, self.budget)
 
     def update_prior(self, signal):
         pass

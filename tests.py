@@ -2,6 +2,8 @@ from market import LMSRMarket
 import math
 import numpy as np
 import random
+import sys
+from simulation import main
 
 test = LMSRMarket()
 error = False
@@ -84,6 +86,21 @@ for i in range(10):
         final_cost = test3.get_cost(test3.state)
         initial_cost = test3.get_cost(np.array([0.,0.]))
         print 'failing bounded loss with mkt state {}, revenue {}, losing {} revenue should be {}'.format(test3.state, test3.revenue, loss, final_cost-initial_cost)
+        error=True
+        break
+
+print 'testing all agents can be initialized'
+sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1"]
+main(sys.argv)
+
+print 'testing that posteriors update correctly'
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100']
+(agents, true_prob) = main(sys.argv)
+for agent in agents:
+    try:
+        assert(abs(agent.cur_belief()-true_prob) <= 0.05)
+    except AssertionError:
+        print('agent belief issue with {}. Exiting'.format(agent))
         error=True
         break
 
