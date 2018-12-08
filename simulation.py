@@ -99,13 +99,14 @@ def sim(config):
         logging.debug('market is {}'.format(market))
 
     # decide payments
-    print '\n\n ---------------------------'
-    print 'simulation over, true probability was {}, avg market probability {}\n\n'.format(true_prob, mean(mkt_probs))
+    if config.output:
+        print '\n\n ---------------------------'
+        print 'simulation over, true probability was {}, avg market probability {}\n\n'.format(true_prob, mean(mkt_probs))
 
-    for agent in agents:
-        print 'agent {} avg payoff {} avg utility {} avg ending belief {}'.format(agent, mean(agent_payoffs[agent.id]), mean(agent_utils[agent.id]), mean(agent_beliefs[agent.id]))
+        for agent in agents:
+            print 'agent {} avg payoff {} avg utility {} avg ending belief {}'.format(agent, mean(agent_payoffs[agent.id]), mean(agent_utils[agent.id]), mean(agent_beliefs[agent.id]))
 
-    print 'On average over {} trials, {} rounds each, the market collected revenue {}, paid {}, achieved profit {}'.format(config.num_trials, config.num_rounds, mean(mkt_revenues), mean(mkt_payoffs), mean(mkt_revenues)-mean(mkt_payoffs))
+        print 'On average over {} trials, {} rounds each, the market collected revenue {}, paid {}, achieved profit {}'.format(config.num_trials, config.num_rounds, mean(mkt_revenues), mean(mkt_payoffs), mean(mkt_revenues)-mean(mkt_payoffs))
 
     return (agents, true_prob)
 
@@ -225,13 +226,18 @@ def main(args):
                       help="Choose either LMSR or LMSRMoney")
 
     parser.add_option("--num_trials",
-                      dest="num_trials", default='10', type="int",
+                      dest="num_trials", default=10, type="int",
                       help="Decide how many times to run the market")
 
     parser.add_option("--initial_state",
-                      dest="state", default='0.1,0.1', type="string",
+                      dest="state", default='0.01,0.01', type="string",
                       help="How many share already sold?")
 
+    parser.add_option("-v",
+                      action="store_true", dest="output", default=True)
+
+    parser.add_option("-q",
+                      action="store_false", dest="output")
 
     (options, args) = parser.parse_args()
 
@@ -266,7 +272,8 @@ def main(args):
     options.agent_class_names = agents_to_run
     options.agent_classes = load_modules(options.agent_class_names)
 
-    logging.info("Starting simulation...")
+    if options.output:
+        logging.info("Starting simulation...")
     return sim(options)
 
 

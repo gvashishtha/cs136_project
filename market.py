@@ -71,7 +71,8 @@ class LMSRMarket(object):
             quant = 0.
 
         out = np.array([0.0, 0.0])
-        out[index] = quant
+        if quant >= 0.: # Ensure no selling condition
+            out[index] = quant
         return out
 
 

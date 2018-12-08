@@ -99,10 +99,10 @@ bounded_loss_test(LMSRMarket)
 bounded_loss_test(LMSRProfitMarket)
 
 print 'testing all agents can be initialized'
-sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1"]
+sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1", '-q']
 main(sys.argv)
 
-sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1", "--mkt_type=LMSRMoney"]
+sys.argv = ["simulation.py", "ZeroI,1", "Truthful,1", "BuyOne,1", "--mkt_type=LMSRMoney", '-q']
 main(sys.argv)
 
 print 'testing that posteriors update correctly'
@@ -117,11 +117,12 @@ def belief_tester():
             error=True
             break
 
-sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSR']
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSR', '-q']
 belief_tester()
-sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSRMoney']
+sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSRMoney', '-q']
 belief_tester()
 
+print ('testing LMSR Profit beta calculations...')
 
 test = LMSRProfitMarket(state=np.array([0.1,0.1]), alpha=0.5)
 assert(test.calc_beta(test.state)==0.1)
@@ -130,6 +131,8 @@ try:
 except AssertionError:
     logging.error('test state is {} beta is {} cost is {}'.format(test.state, test.beta, round(test.get_cost(test.state),3)))
     error=True
+
+print('testing LMSR prices...')
 
 def price_tester(trade, price):
     try:
