@@ -85,10 +85,10 @@ def bounded_loss_test(mkt_type):
 
         # Ensure the loss is bounded by the expected bound
         try:
-            bound = test3.beta*math.log(2)
+            bound = test3.beta*math.log(2)  # equation 18.9 in book
             if isinstance(test3, LMSRProfitMarket):
-                bound = initial_cost
-            assert(loss <= bound) # equation 18.9 in book
+                bound = initial_cost # page 14:19 of Othman
+            assert(loss <= bound)
         except AssertionError:
             final_cost = test3.get_cost(test3.state)
             initial_cost = test3.get_cost(np.array([0.,0.]))
