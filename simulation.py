@@ -21,6 +21,8 @@ def sim(config):
     logging.debug(agents)
     n_agents = len(agents)
 
+    alpha = config.alpha
+    beta = config.beta
     true_prob = config.true_prob
 
     base_holdings = np.array([0.,0.])
@@ -36,7 +38,7 @@ def sim(config):
         random.shuffle(agents)
         for agent in agents:
             # draw a 1 with probability drawn from beta distribution
-            drawn_value = random.betavariate(config.true_alpha, config.true_beta)
+            drawn_value = random.betavariate(alpha, beta)
             if random.random() < drawn_value:
                 signal = 1
             else:
@@ -60,7 +62,6 @@ def sim(config):
 
     logging.debug(market)
     # Decide on the outcome of the simulation
-
     if random.random() < true_prob:
         outcome = True
     else:
@@ -104,16 +105,12 @@ def configure_logging(loglevel):
 
 def init_agents(conf):
     """Each agent class must be already loaded, and have a
-    constructor that takes an id, a budget, a true alpha, a true beta, an alpha, and a beta in that
+    constructor that takes an id, a budget, an alpha, and a beta, in that
     order."""
     n = len(conf.agent_class_names)
-    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.true_alpha), itertools.repeat(conf.true_beta))
+    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.alpha), itertools.repeat(conf.beta))
     def load(class_name, params):
         agent_class = conf.agent_classes[class_name]
-        agent_mu = random.betavariate(conf.true_alpha, conf.true_beta)
-        agent_alpha = agent_mu * conf.sigma
-        agent_beta = conf.sigma - agent_alpha
-        params += (agent_alpha, agent_beta)
         return agent_class(*params)
 
     return map(load, conf.agent_class_names, params)
@@ -175,11 +172,6 @@ def main(args):
                       dest="seed", default=None, type="int",
                       help="seed for random numbers")
 
-    parser.add_option("--sigma",
-                      dest="sigma", default=None, type="int",
-                      help="alpha + beta for agent priors")
-
-
 
     (options, args) = parser.parse_args()
 
@@ -196,15 +188,10 @@ def main(args):
 
     n_agents = len(agents_to_run)
     total_draws = n_agents * options.num_rounds
-
-    if options.sigma is None:
-        options.sigma = total_draws
-    # TODO - every agent gets a different prior, based on sigma
-
     # parameters for true underlying probability
-    options.true_alpha = float(random.randint(1, total_draws))
-    options.true_beta = float(total_draws - options.true_alpha)
-    options.true_prob = options.true_alpha/(options.true_alpha+options.true_beta)
+    options.alpha = float(random.randint(1, total_draws))
+    options.beta = float(total_draws - options.alpha)
+    options.true_prob = options.alpha/(options.alpha+options.beta)
 
     # Add some more config options
     options.agent_class_names = agents_to_run

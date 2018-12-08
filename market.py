@@ -6,7 +6,7 @@ class LMSRMarket(object):
     def __init__(self, state=None, beta=1.0):
         if state is None:
             # state is a numpy array
-            self.state = np.array([2.,2.])
+            self.state = np.array([0.,0.])
         else:
             self.state = state
         self.beta = beta
@@ -113,7 +113,6 @@ class LMSRProfitMarket(LMSRMarket):
 
     def get_cost(self, state):
         # update beta
-        self.update_beta(self.state)
-        print self.beta
+        self.update_beta(state)
         # Uses LMSR to calculate cost under a given state (eqn 18.5)
-        LMSRMarket(self).get_cost(state)
+        return LMSRMarket(self).get_cost(state)
