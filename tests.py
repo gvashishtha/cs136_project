@@ -108,7 +108,9 @@ main(sys.argv)
 print 'testing that posteriors update correctly'
 def belief_tester():
     global error
-    (agents, true_prob) = main(sys.argv)
+    output = main(sys.argv)
+    agents = output[0]
+    true_prob = output[1]
     for agent in agents:
         try:
             assert(abs(agent.cur_belief()-true_prob) <= 0.05)

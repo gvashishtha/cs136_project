@@ -32,7 +32,7 @@ def sim(config):
     # Store the lower and upper bounds on "market probabilities" at each
     # time step, where market probability is the aggregate market belief that
     # an event will occur
-    
+
     mkt_lower_bounds = [[] for _ in range(config.num_trials)]
     mkt_upper_bounds = [[] for _ in range(config.num_trials)]
 
@@ -77,8 +77,8 @@ def sim(config):
                     agent_budgets[agent.id] -= float(price)
                 else:
                     logging.debug('not enough money to trade')
-                mkt_lower_bounds[k].append(market.lower_bound())
-                mkt_upper_bounds[k].append(market.upper_bound())
+            mkt_lower_bounds[k].append(market.lower_bound())
+            mkt_upper_bounds[k].append(market.upper_bound())
 
         logging.debug(market)
 
@@ -118,7 +118,7 @@ def sim(config):
 
         print 'On average over {} trials, {} rounds each, the market collected revenue {}, paid {}, achieved profit {}'.format(config.num_trials, config.num_rounds, mean(mkt_revenues), mean(mkt_payoffs), mean(mkt_revenues)-mean(mkt_payoffs))
 
-    return (agents, true_prob)
+    return [agents, true_prob, mkt_revenues, mkt_probs, mkt_lower_bounds, mkt_upper_bounds, agent_beliefs, mkt_payoffs]
 
 class Params:
     def __init__(self):
