@@ -5,7 +5,7 @@
 
 from optparse import OptionParser
 from util import mean
-from market import LMSRMarket
+from market import LMSRMarket, LMSRProfitMarket
 import copy
 import itertools
 import logging
@@ -41,6 +41,8 @@ def sim(config):
 
         if config.mkt_type == 'LMSR':
             market = LMSRMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
+        if config.mkt_type == 'LMSRMoney':
+            market = LMSRProfitMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
         logging.debug('market is {}, base_holdings are {}'.format(market, base_holdings))
         for t in range(config.num_rounds):
             #agent_order = list(range(n_agents))

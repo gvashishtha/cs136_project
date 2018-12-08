@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 class LMSRMarket(object):
-    def __init__(self, state=None, beta=1.0):
+    def __init__(self, state=None, alpha=1.0, beta=1.0):
         if state is None:
             # state is a numpy array
             self.state = np.array([0.,0.])
@@ -86,11 +86,11 @@ class LMSRProfitMarket(LMSRMarket):
         Given quantity vector (market state) q, we have: 
             beta(q) = alpha*sum_i(q_i) 
         """
-        self.beta = self.alpha*np.sum(state)
+        self.beta = self.alpha*sum(state)
         
-        # momentary fix, debug
-        #if self.beta == 0:
-           # self.beta = 1.0
+        # assuming beta is only zero when we have no participants
+        if self.beta == 0:
+           self.beta = 0.5
 
 
     def instant_price(self, index):
@@ -108,9 +108,10 @@ class LMSRProfitMarket(LMSRMarket):
         C = sum(map(lambda x: x*math.exp(x/self.beta), self.state))
         D = sum(self.state)*sum(powers)
         
-        # momentary fix, think about debugging
-        #if D == 0:
-          #  D = 1
+        # if we are dividing by zero, no contracts bought
+        # so we use original LMSR
+        if D == 0:
+            return LMSRMarket().instant_price(index)
 
         return (A + (B - C)/D)
 
