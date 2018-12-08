@@ -76,38 +76,45 @@ class LMSRProfitMarket(LMSRMarket):
     """
     Modified LMSR to turn profit by relaxing normalization
     """
-    def __init__(self, state=None, beta = 1.0, alpha = 1.0):
+    def __init__(self, state=np.array([0.,0.]), beta=1.0, alpha=1.0):
         LMSRMarket.__init__(self, state, beta)
+        if np.array_equal(self.state,np.array([0.,0.])):
+            self.state += np.array([0.1, 0.1])
+        elif sum(self.state) <= 0:
+            logging.error('state set incorrectly')
+            raise ValueError
+
         self.alpha = alpha
-    
+        if self.alpha <= 0:
+            logging.error('alpha must be greater than 0')
+            raise ValueError
 
-    def update_beta(self, state):
+
+    def update_beta(self):
         """
-        Given quantity vector (market state) q, we have: 
-            beta(q) = alpha*sum_i(q_i) 
+        Given quantity vector (market state) q, we have:
+            beta(q) = alpha*sum_i(q_i)
         """
-        self.beta = self.alpha*sum(state)
-        
-        # assuming beta is only zero when we have no participants
+        self.beta = self.alpha*sum(self.state)
         if self.beta == 0:
-           self.beta = 0.5
-
+            logging.error('LMSRProfit has beta 0')
+            raise ValueError
 
     def instant_price(self, index):
-        """ 
+        """
         Use formula for price at state i from 4.1 in Othman paper
         Calculates the instantaneous price for contract at index
         """
-        # update beta 
-        self.update_beta(self.state)
+        # update beta
+        self.update_beta()
         powers = map(lambda x: math.exp(x/self.beta), self.state)
 
-        # price at index i = A + ((B - C)/D) 
+        # price at index i = A + ((B - C)/D)
         A = self.alpha*math.log(sum(powers))
         B = sum(self.state*math.exp(self.state[index]/self.beta))
         C = sum(map(lambda x: x*math.exp(x/self.beta), self.state))
         D = sum(self.state)*sum(powers)
-        
+
         # if we are dividing by zero, no contracts bought
         # so we use original LMSR
         if D == 0:
@@ -118,6 +125,6 @@ class LMSRProfitMarket(LMSRMarket):
 
     def get_cost(self, state):
         # update beta
-        self.update_beta(state)
+        self.update_beta()
         # Uses LMSR to calculate cost under a given state (eqn 18.5)
         return LMSRMarket(self).get_cost(state)
