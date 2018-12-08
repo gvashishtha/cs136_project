@@ -122,6 +122,30 @@ belief_tester()
 sys.argv = ['simulation.py', 'BuyOne,3', 'Truthful,3', '--num-rounds=100', '--mkt_type=LMSRMoney']
 belief_tester()
 
+
+test = LMSRProfitMarket(state=np.array([0.1,0.1]), alpha=0.5)
+assert(test.calc_beta(test.state)==0.1)
+try:
+    assert(round(test.get_cost(test.state), 3)==0.169)
+except AssertionError:
+    logging.error('test state is {} beta is {} cost is {}'.format(test.state, test.beta, round(test.get_cost(test.state),3)))
+    error=True
+
+def price_tester(trade, price):
+    try:
+        assert(round(test.get_price(trade), 3) == price)
+        test.trade(trade)
+    except AssertionError:
+        print('failing test, real price is {}'.format(test.get_price(trade)))
+        error = True
+
+trades = [[1.,0.], [2,0.],[0.,1.]]
+trades = map(np.array, trades)
+prices = [1.034, 2.124, 0.457]
+
+for t,p in zip(trades, prices):
+    price_tester(t, p)
+
 if not error:
     print('All tests passed!')
 

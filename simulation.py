@@ -40,9 +40,9 @@ def sim(config):
         #agent_utilities = [0. for i in range(n_agents)]
 
         if config.mkt_type == 'LMSR':
-            market = LMSRMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
+            market = LMSRMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
         if config.mkt_type == 'LMSRMoney':
-            market = LMSRProfitMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
+            market = LMSRProfitMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
         logging.debug('market is {}, base_holdings are {}'.format(market, base_holdings))
         for t in range(config.num_rounds):
             #agent_order = list(range(n_agents))
@@ -61,7 +61,7 @@ def sim(config):
                 price = market.get_price(trade)
 
                 if price < 0:
-                    logging.info('negative price {} for trade {}'.format(price, trade))
+                    logging.info('negative price {} for trade {} agent {}'.format(price, trade, agent))
 
                 if price < agent_budgets[agent.id]:
                     logging.debug('able to trade! executing {}'.format(trade))
@@ -213,7 +213,7 @@ def main(args):
                       help="at noise = 0, agents always correctly interpret their signal")
 
     parser.add_option("--alpha_lmsr",
-                      dest="alpha_lmsr", default=1.0, type="float",
+                      dest="alpha_lmsr", default=.05, type="float",
                       help="see page 14:10, section 3.5 in Othman")
 
     parser.add_option("--beta_lmsr",
@@ -228,6 +228,10 @@ def main(args):
                       dest="num_trials", default='10', type="int",
                       help="Decide how many times to run the market")
 
+    parser.add_option("--initial_state",
+                      dest="state", default='0.1,0.1', type="string",
+                      help="How many share already sold?")
+
 
     (options, args) = parser.parse_args()
 
@@ -235,6 +239,9 @@ def main(args):
 
     if options.seed != None:
         random.seed(options.seed)
+
+    initial_state = options.state.split(',')
+    options.state = map(float, initial_state)
 
     if len(args) == 0:
         # default
