@@ -3,7 +3,6 @@ import logging
 import math
 import numpy as np
 
-<<<<<<< HEAD
 class LMSRMarket(object):
     def __init__(self, state=None, beta=1.0):
         if state is None:
