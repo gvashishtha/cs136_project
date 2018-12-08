@@ -40,9 +40,9 @@ def sim(config):
         #agent_utilities = [0. for i in range(n_agents)]
 
         if config.mkt_type == 'LMSR':
-            market = LMSRMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
-        if config.mkt_type == 'LMSRMoney':
-            market = LMSRProfitMarket(state=base_holdings, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
+            market = LMSRMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
+        else:
+            market = LMSRProfitMarket(state=config.state, alpha=config.alpha_lmsr, beta=config.beta_lmsr)
         logging.debug('market is {}, base_holdings are {}'.format(market, base_holdings))
         for t in range(config.num_rounds):
             #agent_order = list(range(n_agents))
@@ -61,7 +61,7 @@ def sim(config):
                 price = market.get_price(trade)
 
                 if price < 0:
-                    logging.info('negative price {} for trade {}'.format(price, trade))
+                    logging.info('negative price {} for trade {} agent {}'.format(price, trade, agent))
 
                 if price < agent_budgets[agent.id]:
                     logging.debug('able to trade! executing {}'.format(trade))
@@ -99,13 +99,14 @@ def sim(config):
         logging.debug('market is {}'.format(market))
 
     # decide payments
-    print '\n\n ---------------------------'
-    print 'simulation over, true probability was {}, avg market probability {}\n\n'.format(true_prob, mean(mkt_probs))
+    if config.output:
+        print '\n\n ---------------------------'
+        print 'simulation over, true probability was {}, avg market probability {}\n\n'.format(true_prob, mean(mkt_probs))
 
-    for agent in agents:
-        print 'agent {} avg payoff {} avg utility {} avg ending belief {}'.format(agent, mean(agent_payoffs[agent.id]), mean(agent_utils[agent.id]), mean(agent_beliefs[agent.id]))
+        for agent in agents:
+            print 'agent {} avg payoff {} avg utility {} avg ending belief {}'.format(agent, mean(agent_payoffs[agent.id]), mean(agent_utils[agent.id]), mean(agent_beliefs[agent.id]))
 
-    print 'On average over {} trials, {} rounds each, the market collected revenue {}, paid {}, achieved profit {}'.format(config.num_trials, config.num_rounds, mean(mkt_revenues), mean(mkt_payoffs), mean(mkt_revenues)-mean(mkt_payoffs))
+        print 'On average over {} trials, {} rounds each, the market collected revenue {}, paid {}, achieved profit {}'.format(config.num_trials, config.num_rounds, mean(mkt_revenues), mean(mkt_payoffs), mean(mkt_revenues)-mean(mkt_payoffs))
 
     return (agents, true_prob)
 
@@ -192,7 +193,7 @@ def main(args):
                       dest="loglevel", default="info",
                       help="Set the logging level: 'debug' or 'info'")
 
-    parser.add_option("--num-rounds",
+    parser.add_option("--num_rounds",
                       dest="num_rounds", default=10, type="int",
                       help="Set number of rounds")
 
@@ -213,7 +214,7 @@ def main(args):
                       help="at noise = 0, agents always correctly interpret their signal")
 
     parser.add_option("--alpha_lmsr",
-                      dest="alpha_lmsr", default=1.0, type="float",
+                      dest="alpha_lmsr", default=.05, type="float",
                       help="see page 14:10, section 3.5 in Othman")
 
     parser.add_option("--beta_lmsr",
@@ -222,12 +223,21 @@ def main(args):
 
     parser.add_option("--mkt_type",
                       dest="mkt_type", default='LMSR', type="string",
-                      help="Choose either LMSR or LMSRMoney")
+                      help="Choose either LMSR or LMSRProfit")
 
     parser.add_option("--num_trials",
-                      dest="num_trials", default='10', type="int",
+                      dest="num_trials", default=10, type="int",
                       help="Decide how many times to run the market")
 
+    parser.add_option("--initial_state",
+                      dest="state", default='0.01,0.01', type="string",
+                      help="How many share already sold?")
+
+    parser.add_option("-v",
+                      action="store_true", dest="output", default=True)
+
+    parser.add_option("-q",
+                      action="store_false", dest="output")
 
     (options, args) = parser.parse_args()
 
@@ -235,6 +245,9 @@ def main(args):
 
     if options.seed != None:
         random.seed(options.seed)
+
+    initial_state = options.state.split(',')
+    options.state = map(float, initial_state)
 
     if len(args) == 0:
         # default
@@ -259,7 +272,8 @@ def main(args):
     options.agent_class_names = agents_to_run
     options.agent_classes = load_modules(options.agent_class_names)
 
-    logging.info("Starting simulation...")
+    if options.output:
+        logging.info("Starting simulation...")
     return sim(options)
 
 

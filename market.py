@@ -20,7 +20,10 @@ class LMSRMarket(object):
         # Tells us how much to charge the agent for a given trade
         try:
             # print("Self.get_cost(state) is: ", self.get_cost(self.state))
-            return self.get_cost(self.state + trade) - self.get_cost(self.state)
+            new_state = self.state + trade
+            old_state = self.state
+            logging.debug('new_state is {} old_state is {}'.format(new_state, old_state))
+            return self.get_cost(new_state) - self.get_cost(old_state)
         except ValueError:
             print 'ValueError trade is {} state is{}'.format(trade, self.state)
             raise ValueError
@@ -68,7 +71,8 @@ class LMSRMarket(object):
             quant = 0.
 
         out = np.array([0.0, 0.0])
-        out[index] = quant
+        if quant >= 0.: # Ensure no selling condition
+            out[index] = quant
         return out
 
 
@@ -76,38 +80,47 @@ class LMSRProfitMarket(LMSRMarket):
     """
     Modified LMSR to turn profit by relaxing normalization
     """
-    def __init__(self, state=None, beta = 1.0, alpha = 1.0):
+    def __init__(self, state=np.array([0.1,0.1]), beta=1.0, alpha=1.0):
         LMSRMarket.__init__(self, state, beta)
+        if sum(self.state) <= 0:
+            logging.error('state set incorrectly')
+            raise ValueError
+
         self.alpha = alpha
-    
+        if self.alpha <= 0:
+            logging.error('alpha must be greater than 0')
+            raise ValueError
 
-    def update_beta(self, state):
+
+    def calc_beta(self, state):
         """
-        Given quantity vector (market state) q, we have: 
-            beta(q) = alpha*sum_i(q_i) 
+        Given quantity vector (market state) q, we have:
+            beta(q) = alpha*sum_i(q_i)
         """
-        self.beta = self.alpha*sum(state)
-        
-        # assuming beta is only zero when we have no participants
+        beta = self.alpha*sum(state)
         if self.beta == 0:
-           self.beta = 0.5
-
+            logging.error('LMSRProfit has beta 0')
+            raise ValueError
+        return beta
 
     def instant_price(self, index):
-        """ 
+        """
         Use formula for price at state i from 4.1 in Othman paper
         Calculates the instantaneous price for contract at index
         """
-        # update beta 
-        self.update_beta(self.state)
-        powers = map(lambda x: math.exp(x/self.beta), self.state)
+        # update beta
+        beta = self.calc_beta(self.state)
+        powers = map(lambda x: math.exp(x/beta), self.state)
 
-        # price at index i = A + ((B - C)/D) 
+        # price at index i = A + ((B - C)/D)
         A = self.alpha*math.log(sum(powers))
-        B = sum(self.state*math.exp(self.state[index]/self.beta))
-        C = sum(map(lambda x: x*math.exp(x/self.beta), self.state))
+        B = 0.
+        for i in range(len(self.state)):
+            B += self.state[i]*math.exp(self.state[index]/beta)
+        #B = sum(self.state*math.exp(self.state[index]/beta))
+        C = sum(map(lambda x: x*math.exp(x/beta), self.state))
         D = sum(self.state)*sum(powers)
-        
+
         # if we are dividing by zero, no contracts bought
         # so we use original LMSR
         if D == 0:
@@ -115,9 +128,17 @@ class LMSRProfitMarket(LMSRMarket):
 
         return (A + (B - C)/D)
 
+    def trade(self, trade):
+        # updates the market state based on a given trade
+        self.revenue += self.get_price(trade)
+        self.state += trade
 
     def get_cost(self, state):
         # update beta
-        self.update_beta(state)
+        beta = self.calc_beta(state)
+        helper = LMSRMarket(beta=beta)
+
         # Uses LMSR to calculate cost under a given state (eqn 18.5)
-        return LMSRMarket(self).get_cost(state)
+        return helper.get_cost(state)
+
+        #return LMSRMarket(self).get_cost(state)
