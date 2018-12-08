@@ -5,7 +5,7 @@
 
 from optparse import OptionParser
 from util import mean
-from market import LMSRMarket, LMSRProfitMarket
+from market import LMSRMarket
 import copy
 import itertools
 import logging
@@ -21,44 +21,10 @@ def sim(config):
     logging.debug(agents)
     n_agents = len(agents)
 
-    alpha = config.alpha
-    beta = config.beta
     true_prob = config.true_prob
 
     base_holdings = np.array([0.,0.])
 
-<<<<<<< HEAD
-    agent_budgets = [float(a.budget) for a in agents]
-    agent_holdings = [copy.deepcopy(base_holdings) for i in range(n_agents)]
-    agent_payoffs = [0. for i in range(n_agents)]
-
-    market = LMSRProfitMarket(state=base_holdings)
-    logging.debug(market)
-    for t in range(config.num_rounds):
-        #agent_order = list(range(n_agents))
-        random.shuffle(agents)
-        for agent in agents:
-            # draw a 1 with probability drawn from beta distribution
-            drawn_value = random.betavariate(alpha, beta)
-            if random.random() < drawn_value:
-                signal = 1
-            else:
-                signal = 0
-            logging.debug('true prob is {} drawn value is {}, signal is {} agent belief is {}'.format(true_prob, drawn_value, signal, agent.cur_belief()))
-            for a in agents:
-                a.update_prior(signal)
-            trade = agent.calc_quantity(market)
-            price = market.get_price(trade)
-
-            if price < 0:
-                logging.info('negative price {} for trade {}'.format(price, trade))
-
-            if price < agent_budgets[agent.id]:
-                logging.debug('able to trade! executing {}'.format(trade))
-                market.trade(trade)
-                agent_holdings[agent.id] += trade
-                agent_budgets[agent.id] -= float(price)
-=======
     mkt_probs = []
     mkt_revenues = []
     mkt_payoffs = []
@@ -116,7 +82,6 @@ def sim(config):
             if outcome:
                 payoff = agent_holdings[agent.id][0]
                 agent_payoffs[agent.id][k] += payoff
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
             else:
                 payoff = agent_holdings[agent.id][1]
                 agent_payoffs[agent.id][k] += payoff
@@ -125,20 +90,11 @@ def sim(config):
             mkt_payoff += payoff
             agent_beliefs[agent.id][k] = agent.cur_belief()
 
-<<<<<<< HEAD
-    logging.debug(market)
-    # Decide on the outcome of the simulation
-    if random.random() < true_prob:
-        outcome = True
-    else:
-        outcome = False
-=======
         mkt_probs.append(market.instant_price(0))
         mkt_revenues.append(market.revenue)
         mkt_payoffs.append(mkt_payoff)
 
         logging.debug('market is {}'.format(market))
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
 
     # decide payments
     print '\n\n ---------------------------'
@@ -176,19 +132,16 @@ def configure_logging(loglevel):
 
 def init_agents(conf):
     """Each agent class must be already loaded, and have a
-<<<<<<< HEAD
-    constructor that takes an id, a budget, an alpha, and a beta, in that
-    order."""
-    n = len(conf.agent_class_names)
-    params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.alpha), itertools.repeat(conf.beta))
-=======
     constructor that takes an id, a budget, a true alpha, a true beta, a
     noise value, an alpha, and a beta in that order."""
     n = len(conf.agent_class_names)
     params = zip(range(n), itertools.repeat(conf.budget), itertools.repeat(conf.true_alpha), itertools.repeat(conf.true_beta), itertools.repeat(conf.noise))
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
     def load(class_name, params):
         agent_class = conf.agent_classes[class_name]
+        agent_mu = random.betavariate(conf.true_alpha, conf.true_beta)
+        agent_alpha = agent_mu * conf.sigma
+        agent_beta = conf.sigma - agent_alpha
+        params += (agent_alpha, agent_beta)
         return agent_class(*params)
 
     return map(load, conf.agent_class_names, params)
@@ -249,8 +202,6 @@ def main(args):
                       dest="seed", default=None, type="int",
                       help="seed for random numbers")
 
-<<<<<<< HEAD
-=======
     parser.add_option("--sigma",
                       dest="sigma", default=None, type="int",
                       help="alpha + beta for agent priors")
@@ -275,7 +226,6 @@ def main(args):
                       dest="num_trials", default='10', type="int",
                       help="Decide how many times to run the market")
 
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
 
     (options, args) = parser.parse_args()
 
@@ -292,12 +242,6 @@ def main(args):
 
     n_agents = len(agents_to_run)
     total_draws = n_agents * options.num_rounds
-<<<<<<< HEAD
-    # parameters for true underlying probability
-    options.alpha = float(random.randint(1, total_draws))
-    options.beta = float(total_draws - options.alpha)
-    options.true_prob = options.alpha/(options.alpha+options.beta)
-=======
 
     if options.sigma is None:
         options.sigma = total_draws
@@ -308,7 +252,6 @@ def main(args):
     options.true_alpha = float(random.randint(1, total_draws-1))
     options.true_beta = float(total_draws - options.true_alpha)
     options.true_prob = options.true_alpha/(options.true_alpha+options.true_beta)
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
 
     # Add some more config options
     options.agent_class_names = agents_to_run

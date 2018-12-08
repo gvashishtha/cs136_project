@@ -6,10 +6,6 @@ import numpy as np
 <<<<<<< HEAD
 class LMSRMarket(object):
     def __init__(self, state=None, beta=1.0):
-=======
-class LMSRMarket():
-    def __init__(self, state=None, alpha=1.0, beta=1.0):
->>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
         if state is None:
             # state is a numpy array
             self.state = np.array([0.,0.])
