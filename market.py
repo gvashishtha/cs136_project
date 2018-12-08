@@ -85,8 +85,8 @@ class LMSRProfitMarket(LMSRMarket):
         self.beta = self.alpha*np.sum(state)
         
         # momentary fix, debug
-        if self.beta == 0:
-            self.beta = 1.0
+        #if self.beta == 0:
+           # self.beta = 1.0
 
 
     def instant_price(self, index):
@@ -105,8 +105,8 @@ class LMSRProfitMarket(LMSRMarket):
         D = sum(self.state)*sum(powers)
         
         # momentary fix, think about debugging
-        if D == 0:
-            D = 1
+        #if D == 0:
+          #  D = 1
 
         return (A + (B - C)/D)
 
