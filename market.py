@@ -1,14 +1,20 @@
+import copy
 import logging
 import math
 import numpy as np
 
+<<<<<<< HEAD
 class LMSRMarket(object):
     def __init__(self, state=None, beta=1.0):
+=======
+class LMSRMarket():
+    def __init__(self, state=None, alpha=1.0, beta=1.0):
+>>>>>>> 8d2c0f323c47a018b966b901e58851aa3e938806
         if state is None:
             # state is a numpy array
             self.state = np.array([0.,0.])
         else:
-            self.state = state
+            self.state = copy.deepcopy(state)
         self.beta = beta
         self.revenue = 0.0
 
@@ -61,7 +67,10 @@ class LMSRMarket(object):
             return np.array([0.0, 0.0])
 
         constant = math.exp(self.state[1-index]/self.beta)
-        quant = self.beta*math.log(true_belief * constant/(1.-true_belief))-float(self.state[index])
+        try:
+            quant = self.beta*math.log(true_belief * constant/(1.-true_belief))-float(self.state[index])
+        except ZeroDivisionError:
+            quant = 0.
 
         out = np.array([0.0, 0.0])
         out[index] = quant

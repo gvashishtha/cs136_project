@@ -3,8 +3,10 @@ import logging
 import numpy as np
 
 class BuyOne(BaseAgent):
-    def __repr__(self):
-        return 'BuyOne id {} budget {} belief {}'.format(self.id, self.budget, self.cur_belief())
+    # def __repr__(self):
+    #     return 'BuyOne id {} budget {} belief {}'.format(self.id, self.budget, self.cur_belief())
+    def name(self):
+        return 'BuyOne'
 
     def calc_quantity(self, market):
         # If market probability is less than current belief, try to buy 1 share for the outcome
