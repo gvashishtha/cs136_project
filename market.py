@@ -2,6 +2,7 @@ import copy
 import logging
 import math
 import numpy as np
+import random
 
 class LMSRMarket(object):
     def __init__(self, state=None, alpha=1.0, beta=1.0):
@@ -66,6 +67,8 @@ class LMSRMarket(object):
     def calc_quantity(self, true_belief):
         # given an agent's true belief, calculate a vector of trades
         # that would make the market belief match their true belief
+
+        logging.debug('pos_price {}, neg_price {}, true_belief {}'.format(self.pos_price(), self.neg_price(), true_belief))
         if self.pos_price() < true_belief:
             index = 0
         elif self.neg_price() < (1.-true_belief):
@@ -89,6 +92,8 @@ class LMSRMarket(object):
         out = np.array([0.0, 0.0])
         if quant >= 0.: # Ensure no selling condition
             out[index] = quant
+
+        logging.debug('calc_quantity returning {} quant was {} index was {}'.format(out, quant, index))
         return out
 
 
@@ -158,3 +163,28 @@ class LMSRProfitMarket(LMSRMarket):
         return helper.get_cost(state)
 
         #return LMSRMarket(self).get_cost(state)
+
+    def calc_quantity(self, true_belief):
+        # given an agent's true belief, calculate a vector of trades
+        # that would make the market belief match their true belief
+
+        logging.debug('pos_price {}, neg_price {}, true_belief {}'.format(self.pos_price(), self.neg_price(), true_belief))
+        if self.pos_price() < true_belief:
+            index = 0
+        elif self.neg_price() < (1.-true_belief):
+            index = 1
+            true_belief = 1. - true_belief # we are trying to reset the negative belief
+        else:
+            return np.array([0.0, 0.0])
+
+        out = np.array([0.0, 0.0])
+        for i in range(5):
+            quant = random.random()
+            out[index] = quant
+
+            if self.get_price(out) < true_belief:
+                logging.debug('calc_quantity returning {} quant was {} index was {}'.format(out, quant, index))
+                return out
+
+        out[index] = 0.
+        return out

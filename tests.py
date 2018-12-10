@@ -135,12 +135,13 @@ except AssertionError:
     logging.error('test state is {} beta is {} cost is {}'.format(test.state, test.beta, round(test.get_cost(test.state),3)))
     error=True
 
-print('testing LMSR prices...')
+print('testing LMSR Profit prices...')
 
 def price_tester(trade, price):
     try:
         assert(round(test.get_price(trade), 3) == price)
         test.trade(trade)
+        assert(sum([test.instant_price(0), test.instant_price(1)]) <= 1. + test.alpha*2*math.log(2)) # from page 14:13 of Othman
     except AssertionError:
         print('failing test, real price is {}'.format(test.get_price(trade)))
         error = True
