@@ -171,19 +171,21 @@ class LMSRProfitMarket(LMSRMarket):
         logging.debug('pos_price {}, neg_price {}, true_belief {}'.format(self.pos_price(), self.neg_price(), true_belief))
         if self.pos_price() < true_belief:
             index = 0
+            upper = true_belief-self.pos_price()
         elif self.neg_price() < (1.-true_belief):
             index = 1
             true_belief = 1. - true_belief # we are trying to reset the negative belief
+            upper = true_belief-self.neg_price()
         else:
             return np.array([0.0, 0.0])
 
         out = np.array([0.0, 0.0])
-        for i in range(5):
-            quant = random.random()
+        for i in range(10):
+            quant = random.uniform(0., upper)
             out[index] = quant
 
-            if self.get_price(out) < true_belief:
-                logging.debug('calc_quantity returning {} quant was {} index was {}'.format(out, quant, index))
+            if self.get_price(out) < true_belief*quant:
+                logging.debug('calc_quantity returning {} true_belief {} state {}'.format(out, true_belief, self.state))
                 return out
 
         out[index] = 0.
