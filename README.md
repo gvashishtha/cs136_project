@@ -19,7 +19,7 @@ python simulation.py [options] PeerClass1[,cnt] PeerClass2[,cnt] ...
 + **-v** Store the output value
 + **-q** Don't store output value; default is __-q__
 
-## Trials to run
+## Some interesting trials to run
 
 __PA__ means prediction accuracy
 
